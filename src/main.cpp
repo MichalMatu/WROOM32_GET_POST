@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <WebServer.h>
+#include <SPIFFS.h>
 
 const char *ssid = "ESP32-AP";
 const char *password = "password";
@@ -9,7 +10,16 @@ String value = "Initial Value"; // The value to be updated
 
 void handleRoot()
 {
-  server.send(200, "text/html", "<html><body><div id='value'>" + value + "</div><button onclick='updateValue()'>Update Value</button><script>function updateValue() { var newValue = prompt('Enter new value:'); if (newValue !== null) { sendData(newValue); } } function sendData(value) { var xhttp = new XMLHttpRequest(); xhttp.onreadystatechange = function() { if (this.readyState == 4 && this.status == 200) { document.getElementById('value').innerHTML = this.responseText; } }; xhttp.open('POST', '/update', true); xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); xhttp.send('value=' + value); }</script></body></html>");
+  File file = SPIFFS.open("/index.html", "r");
+  if (file)
+  {
+    server.streamFile(file, "text/html");
+    file.close();
+  }
+  else
+  {
+    server.send(404, "text/plain", "File not found");
+  }
 }
 
 void handleUpdate()
@@ -33,6 +43,12 @@ void setup()
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
+
+  if (!SPIFFS.begin(true))
+  {
+    Serial.println("An error occurred while mounting SPIFFS");
+    return;
+  }
 
   server.on("/", handleRoot);
   server.on("/update", handleUpdate);
