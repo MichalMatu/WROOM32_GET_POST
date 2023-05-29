@@ -6,14 +6,17 @@
 </head>
 
 <body>
-    <div id="value">Initial Value</div>
-    <button onclick="updateValue()">Update Value</button>
+    <div id="value">Loading...</div>
+    <input type="number" id="newValue" min="1000" max="100000">
+    <button onclick="updateValue()">Set</button>
 
     <script>
         function updateValue() {
-            var newValue = prompt('Enter new value:');
-            if (newValue !== null) {
+            var newValue = document.getElementById('newValue').value;
+            if (newValue >= 1000 && newValue <= 100000) {
                 sendData(newValue);
+            } else {
+                alert("Please enter a number between 1000 and 100000");
             }
         }
 
@@ -28,6 +31,18 @@
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.send('value=' + encodeURIComponent(value));
         }
+
+        // Load the initial value when the page is loaded
+        window.addEventListener('DOMContentLoaded', function () {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.getElementById('value').innerText = xhr.responseText;
+                }
+            };
+            xhr.open('GET', '/getValue', true);
+            xhr.send();
+        });
     </script>
 </body>
 
