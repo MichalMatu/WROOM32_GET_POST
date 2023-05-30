@@ -1,8 +1,9 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <SPIFFS.h>
-// declare onboard LED pin
-#define LED 2
+#include <Preferences.h>
+
+Preferences preferences;
 
 const char *ssid = "ESP32-AP";
 const char *password = "password";
@@ -10,8 +11,6 @@ WebServer server(80);
 
 int value = 1000; // The value to be updated
 unsigned long previousMillis = 0;
-unsigned long interval = 1000; // Initial interval for LED blinking (in milliseconds)
-bool ledState = false;         // LED state
 
 void handleRoot()
 {
@@ -35,6 +34,9 @@ void handleUpdate()
   {
     value = server.arg("value").toInt();
     server.send(200, "text/plain", String(value));
+
+    // Save the value to preferences
+    preferences.putInt("value", value);
   }
   else
   {
@@ -50,7 +52,9 @@ void handleGetValue()
 void setup()
 {
   Serial.begin(115200);
-  pinMode(LED, OUTPUT);
+
+  preferences.begin("myApp", false);         // Specify a namespace for your preferences
+  value = preferences.getInt("value", 1000); // Load the value from preferences or use the default value (1000 in this case)
 
   WiFi.softAP(ssid, password);
   IPAddress IP = WiFi.softAPIP();
@@ -74,7 +78,7 @@ void loop()
 {
   server.handleClient();
 
-    unsigned long currentMillis = millis();
+  unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= value)
   {
     previousMillis = currentMillis;
