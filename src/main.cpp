@@ -1,9 +1,6 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <SPIFFS.h>
-#include <Preferences.h>
-
-Preferences preferences;
 
 const char *ssid = "ESP32-AP";
 const char *password = "password";
@@ -34,9 +31,6 @@ void handleUpdate()
   {
     value = server.arg("value").toInt();
     server.send(200, "text/plain", String(value));
-
-    // Save the value to preferences
-    preferences.putInt("value", value);
   }
   else
   {
@@ -52,9 +46,6 @@ void handleGetValue()
 void setup()
 {
   Serial.begin(115200);
-
-  preferences.begin("myApp", false);         // Specify a namespace for your preferences
-  value = preferences.getInt("value", 1000); // Load the value from preferences or use the default value (1000 in this case)
 
   WiFi.softAP(ssid, password);
   IPAddress IP = WiFi.softAPIP();
