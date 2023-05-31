@@ -198,7 +198,7 @@ void setup()
   }
   else
   {
-    Serial.println("Failed to connect to WiFi");
+    Serial.println("Failed_to_connect_to_WiFi");
   }
 
   if (!SPIFFS.begin(true))
