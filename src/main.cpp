@@ -4,9 +4,14 @@
 
 #include <Preferences.h>
 Preferences preferences;
+// WiFi AP credentials
+char ap_ssid[32] = "ESP32-AP";
+char ap_password[64] = "password";
 
-const char *ssid = "ESP32-AP";
-const char *password = "password";
+// WiFi Station credentials
+char sta_ssid[32] = "Your_WiFi_SSID";
+char sta_password[64] = "Your_WiFi_Password";
+
 WebServer server(80);
 
 int value = 1000; // The value to be updated
@@ -49,6 +54,12 @@ void handleGetValue()
   server.send(200, "text/plain", String(value));
 }
 
+void handleAPCredentials()
+{
+  // send ap ssid, password and ip to client
+  server.send(200, "text/plain", String(ap_ssid) + " " + String(ap_password) + " " + WiFi.softAPIP().toString());
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -56,7 +67,7 @@ void setup()
   preferences.begin("myApp", false);         // Specify a namespace for your preferences
   value = preferences.getInt("value", 1000); // Load the value from preferences or use the default value (1000 in this case)
 
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ap_ssid, ap_password);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
@@ -70,6 +81,8 @@ void setup()
   server.on("/", handleRoot);
   server.on("/update", handleUpdate);
   server.on("/getValue", handleGetValue);
+  // Wi-Fi AP credentials
+  server.on("/AP_credentials", handleAPCredentials);
 
   server.begin();
 }

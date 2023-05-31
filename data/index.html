@@ -9,6 +9,12 @@
     <div id="value">Loading...</div>
     <input type="number" id="newValue" min="1000" max="100000">
     <button onclick="updateValue()">Set</button>
+    <p>Wi-Fi AP Credentials:</p>
+    <div id="APPassword">Loading...</div>
+    <div id="APSSID">Loading...</div>
+    <div id="APIP">Loading...</div>
+
+
 
     <script>
         function updateValue() {
@@ -32,8 +38,8 @@
             xhr.send('value=' + encodeURIComponent(value));
         }
 
-        // Load the initial value when the page is loaded
-        window.addEventListener('DOMContentLoaded', function () {
+        // Function to make an XMLHttpRequest to retrieve the initial value
+        function loadInitialValue() {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
@@ -42,7 +48,31 @@
             };
             xhr.open('GET', '/getValue', true);
             xhr.send();
-        });
+        }
+
+        // Function to load the AP credentials
+        function loadAPCredentials() {
+            fetch('/AP_credentials')
+                .then(function (response) {
+                    return response.text();
+                })
+                .then(function (data) {
+                    var credentials = data.split(' ');
+
+                    document.getElementById('APSSID').innerText = 'SSID: ' + credentials[0];
+                    document.getElementById('APPassword').innerText = 'Password: ' + credentials[1];
+                    document.getElementById('APIP').innerText = 'IP Address: ' + credentials[2];
+                });
+        }
+
+        // Load the initial value when the page is loaded
+        window.addEventListener('DOMContentLoaded', loadInitialValue);
+
+        // Call the function to load the AP credentials when the page is loaded
+        window.addEventListener('load', loadAPCredentials);
+
+
+
     </script>
 </body>
 
