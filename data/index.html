@@ -159,6 +159,9 @@
                 return false;
             }
 
+            // grab id="STA_BTN" and change the value to "Connecting...", and disable the button
+            document.getElementById("STA_BTN").value = "Connecting...";
+            document.getElementById("STA_BTN").disabled = true;
 
             xhttp.open("POST", "/STA_CREDENTIALS_SET", true);
             xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -170,11 +173,12 @@
                     // set the SSID and password
                     document.getElementById("STASSID").innerText = 'SSID: ' + credentials[0];
                     document.getElementById("STAPassword").innerText = 'Password: ' + credentials[1];
+                    document.getElementById("STAIP").innerText = 'IP: ' + credentials[2];
 
-                    // if there's a third item in the response, set it as the IP
-                    if (credentials.length > 2) {
-                        document.getElementById("STAIP").innerText = 'IP: ' + credentials[2];
-                    }
+                    // grab id="STA_BTN" and change the value to "Submit", and enable the button
+                    document.getElementById("STA_BTN").value = "Submit";
+                    document.getElementById("STA_BTN").disabled = false;
+
                 }
             };
             xhttp.send("sta_ssid=" + sta_ssid + "&sta_password=" + sta_password);
