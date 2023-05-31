@@ -111,18 +111,18 @@
             var newApSsid = document.getElementById('APSSID_SET').value;
             var newApPassword = document.getElementById('APPassword_SET').value;
 
-            // Add SSID and Password Validations
-            var alphanumericRegex = /^[a-z0-9]+$/i; // This regex matches any string made up of letters and numbers
+            var alphanumericWithSymbolsRegex = /^[a-z0-9\s~`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/i;
 
-            if (newApSsid.length < 1 || !alphanumericRegex.test(newApSsid)) {
-                alert('SSID must be at least 1 character long and only contain letters and numbers.');
+            if (newApSsid.length < 1 || !alphanumericWithSymbolsRegex.test(newApSsid)) {
+                alert('SSID must be at least 1 character long and can contain letters, numbers, and symbols.');
                 return false;
             }
 
-            if (newApPassword.length < 8 || newApPassword.length > 64 || !alphanumericRegex.test(newApPassword)) {
-                alert('Password must be between 8 and 64 characters long and only contain letters and numbers.');
+            if (newApPassword.length < 8 || newApPassword.length > 64 || !alphanumericWithSymbolsRegex.test(newApPassword)) {
+                alert('Password must be between 8 and 64 characters long and can contain letters, numbers, and symbols.');
                 return false;
             }
+
 
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
@@ -147,15 +147,18 @@
             // Add SSID and Password Validations
             var alphanumericRegex = /^[a-z0-9]+$/i; // This regex matches any string made up of letters and numbers
 
-            if (sta_ssid.length < 1 || !alphanumericRegex.test(sta_ssid)) {
-                alert('SSID must be at least 1 character long and only contain letters and numbers.');
+            var alphanumericWithSymbolsRegex = /^[a-z0-9\s~`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/i;
+
+            if (sta_ssid.length < 1 || !alphanumericWithSymbolsRegex.test(sta_ssid)) {
+                alert('SSID must be at least 1 character long and can contain letters, numbers, and symbols.');
                 return false;
             }
 
-            if (sta_password.length < 8 || sta_password.length > 64 || !alphanumericRegex.test(sta_password)) {
-                alert('Password must be between 8 and 64 characters long and only contain letters and numbers.');
+            if (sta_password.length < 8 || sta_password.length > 64 || !alphanumericWithSymbolsRegex.test(sta_password)) {
+                alert('Password must be between 8 and 64 characters long and can contain letters, numbers, and symbols.');
                 return false;
             }
+
 
             xhttp.open("POST", "/STA_CREDENTIALS_SET", true);
             xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
