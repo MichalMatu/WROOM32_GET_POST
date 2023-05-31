@@ -13,10 +13,6 @@
     <div id="APPassword">Loading...</div>
     <div id="APSSID">Loading...</div>
     <div id="APIP">Loading...</div>
-    <p>Wi-Fi STA Credentials</p>
-    <div id="STASSID">Loading...</div>
-    <div id="STAPassword">Loading...</div>
-    <div id="STAIP">Loading...</div>
     <!-- create form to change APSSID_SET and APPassword_SET -->
     <form onsubmit="updateAPCredentials(); return false;">
         <label for="APSSID_SET">AP SSID:</label>
@@ -25,6 +21,16 @@
         <input type="text" id="APPassword_SET" name="APPassword_SET"><br><br>
         <input type="submit" value="Submit">
     </form>
+
+
+
+
+    <hr>
+    <p>Wi-Fi STA Credentials</p>
+    <div id="STASSID">Loading...</div>
+    <div id="STAPassword">Loading...</div>
+    <div id="STAIP">Loading...</div>
+
 
 
 
@@ -117,12 +123,16 @@
                     var credentials = xhr.responseText.split(" ");
                     document.getElementById('APSSID_SET').value = credentials[0];
                     document.getElementById('APPassword_SET').value = credentials[1];
+
+                    // Show an alert with the new credentials
+                    alert("New AP SSID: " + credentials[0] + "\nNew AP Password: " + credentials[1]);
                 }
             };
             xhr.open('POST', '/AP_CREDENTIALS_SET', true);
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.send('ap_ssid=' + encodeURIComponent(newApSsid) + '&ap_password=' + encodeURIComponent(newApPassword));
         }
+
 
 
 
