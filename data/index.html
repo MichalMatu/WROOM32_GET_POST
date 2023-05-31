@@ -23,8 +23,6 @@
     </form>
 
 
-
-
     <hr>
     <p>Wi-Fi STA Credentials</p>
     <div id="STASSID">Loading...</div>
@@ -131,6 +129,11 @@
             xhr.open('POST', '/AP_CREDENTIALS_SET', true);
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.send('ap_ssid=' + encodeURIComponent(newApSsid) + '&ap_password=' + encodeURIComponent(newApPassword));
+        }
+
+        function updateSTACredentials (){
+
+            
         }
 
 
