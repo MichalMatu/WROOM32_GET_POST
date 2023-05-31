@@ -60,17 +60,81 @@ void handleAPCredentials()
   server.send(200, "text/plain", String(ap_ssid) + " " + String(ap_password) + " " + WiFi.softAPIP().toString());
 }
 
+void handleSTACredentials()
+{
+  // send sta ssid, password and ip to client
+  server.send(200, "text/plain", String(sta_ssid) + " " + String(sta_password) + " " + WiFi.localIP().toString());
+}
+
+void handleAPCredentialsSet()
+{
+  // get ap ssid and password from client
+  if (server.hasArg("ap_ssid") && server.hasArg("ap_password"))
+  {
+    String new_ap_ssid = server.arg("ap_ssid");
+    String new_ap_password = server.arg("ap_password");
+
+    // save new ap ssid and password to preferences
+    preferences.putString("ap_ssid", new_ap_ssid);
+    preferences.putString("ap_password", new_ap_password);
+
+    // Update the in-memory variables
+    strncpy(ap_ssid, new_ap_ssid.c_str(), sizeof(ap_ssid));
+    strncpy(ap_password, new_ap_password.c_str(), sizeof(ap_password));
+
+    // send new ap ssid and password to client
+    server.send(200, "text/plain", new_ap_ssid + " " + new_ap_password);
+    // disconnect all clients to update ap ssid and password, then restart ap
+    WiFi.softAPdisconnect(true);
+    WiFi.softAP(new_ap_ssid.c_str(), new_ap_password.c_str());
+  }
+  else
+  {
+    server.send(400, "text/plain", "Invalid request");
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
 
-  preferences.begin("myApp", false);         // Specify a namespace for your preferences
-  value = preferences.getInt("value", 1000); // Load the value from preferences or use the default value (1000 in this case)
+  preferences.begin("myApp", false);
+  value = preferences.getInt("value", 1000);
 
-  WiFi.softAP(ap_ssid, ap_password);
+  String pref_ap_ssid = preferences.getString("ap_ssid", "");
+  String pref_ap_password = preferences.getString("ap_password", "");
+
+  if (pref_ap_ssid.length() > 0 && pref_ap_password.length() > 0)
+  {
+    pref_ap_ssid.toCharArray(ap_ssid, sizeof(ap_ssid));
+    pref_ap_password.toCharArray(ap_password, sizeof(ap_password));
+  }
+
+  WiFi.mode(WIFI_AP_STA);            // Enable both AP and STA modes
+  WiFi.softAP(ap_ssid, ap_password); // Start AP
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
+
+  WiFi.begin(sta_ssid, sta_password); // Connect to WiFi network
+
+  unsigned long startAttemptTime = millis();
+
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 2000) // 2 seconds timeout
+  {
+    delay(500);
+    Serial.println("Connecting to WiFi...");
+  }
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.print("Connected to WiFi, IP address: ");
+    Serial.println(WiFi.localIP());
+  }
+  else
+  {
+    Serial.println("Failed to connect to WiFi");
+  }
 
   if (!SPIFFS.begin(true))
   {
@@ -81,8 +145,9 @@ void setup()
   server.on("/", handleRoot);
   server.on("/update", handleUpdate);
   server.on("/getValue", handleGetValue);
-  // Wi-Fi AP credentials
   server.on("/AP_credentials", handleAPCredentials);
+  server.on("/STA_credentials", handleSTACredentials);
+  server.on("/AP_CREDENTIALS_SET", handleAPCredentialsSet);
 
   server.begin();
 }

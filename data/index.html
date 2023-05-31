@@ -17,6 +17,16 @@
     <div id="STASSID">Loading...</div>
     <div id="STAPassword">Loading...</div>
     <div id="STAIP">Loading...</div>
+    <!-- create form to change APSSID_SET and APPassword_SET -->
+    <form onsubmit="updateAPCredentials(); return false;">
+        <label for="APSSID_SET">AP SSID:</label>
+        <input type="text" id="APSSID_SET" name="APSSID_SET"><br><br>
+        <label for="APPassword_SET">AP Password:</label>
+        <input type="text" id="APPassword_SET" name="APPassword_SET"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+
 
 
 
@@ -83,6 +93,38 @@
                     document.getElementById('STAIP').innerText = 'IP Address: ' + credentials[2];
                 });
         }
+
+        function updateAPCredentials() {
+            var newApSsid = document.getElementById('APSSID_SET').value;
+            var newApPassword = document.getElementById('APPassword_SET').value;
+
+            // Add SSID and Password Validations
+            var alphanumericRegex = /^[a-z0-9]+$/i; // This regex matches any string made up of letters and numbers
+
+            if (newApSsid.length < 1 || !alphanumericRegex.test(newApSsid)) {
+                alert('SSID must be at least 1 character long and only contain letters and numbers.');
+                return false;
+            }
+
+            if (newApPassword.length < 8 || newApPassword.length > 64 || !alphanumericRegex.test(newApPassword)) {
+                alert('Password must be between 8 and 64 characters long and only contain letters and numbers.');
+                return false;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var credentials = xhr.responseText.split(" ");
+                    document.getElementById('APSSID_SET').value = credentials[0];
+                    document.getElementById('APPassword_SET').value = credentials[1];
+                }
+            };
+            xhr.open('POST', '/AP_CREDENTIALS_SET', true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.send('ap_ssid=' + encodeURIComponent(newApSsid) + '&ap_password=' + encodeURIComponent(newApPassword));
+        }
+
+
 
 
 
