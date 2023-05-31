@@ -125,7 +125,7 @@ void handleSTACredentialsSet()
 
     unsigned long startAttemptTime = millis();
 
-    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 8000) // 2 seconds timeout
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 5000) // 5 seconds timeout
     {
       delay(500);
       Serial.println("Connecting to WiFi...");
@@ -135,7 +135,7 @@ void handleSTACredentialsSet()
     {
       Serial.print("Connected to WiFi, IP address: ");
       Serial.println(WiFi.localIP());
-    }
+        }
     else
     {
       Serial.println("Failed to connect to WiFi");
@@ -182,7 +182,7 @@ void setup()
 
   unsigned long startAttemptTime = millis();
 
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 2000) // 2 seconds timeout
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 5000) // 2 seconds timeout
   {
     delay(500);
     Serial.println("Connecting to WiFi...");
