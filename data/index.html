@@ -28,6 +28,15 @@
     <div id="STASSID">Loading...</div>
     <div id="STAPassword">Loading...</div>
     <div id="STAIP">Loading...</div>
+    <!-- create form to change STASSID_SET and STAPassword_SET -->
+
+    <form onsubmit="updateSTACredentials(); return false;">
+        <label for="STASSID_SET">STA SSID:</label>
+        <input type="text" id="STASSID_SET" name="STASSID_SET"><br><br>
+        <label for="STAPassword_SET">STA Password:</label>
+        <input type="password" id="STAPassword_SET" name="STAPassword_SET"><br><br>
+        <input type="submit" value="Submit">
+    </form>
 
 
 
@@ -131,9 +140,19 @@
             xhr.send('ap_ssid=' + encodeURIComponent(newApSsid) + '&ap_password=' + encodeURIComponent(newApPassword));
         }
 
-        function updateSTACredentials (){
+        function updateSTACredentials() {
+            var xhttp = new XMLHttpRequest();
+            var sta_ssid = document.getElementById("STASSID_SET").value;
+            var sta_password = document.getElementById("STAPassword_SET").value;
 
-            
+            xhttp.open("POST", "/STA_CREDENTIALS_SET", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    alert("STA Credentials Updated: " + this.responseText);
+                }
+            };
+            xhttp.send("sta_ssid=" + sta_ssid + "&sta_password=" + sta_password);
         }
 
 
