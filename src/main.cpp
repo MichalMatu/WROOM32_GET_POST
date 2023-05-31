@@ -109,8 +109,6 @@ void handleSTACredentialsSet()
     strncpy(sta_ssid, new_sta_ssid.c_str(), sizeof(sta_ssid));
     strncpy(sta_password, new_sta_password.c_str(), sizeof(sta_password));
 
-    // send new sta ssid and password to client
-    server.send(200, "text/plain", new_sta_ssid + " " + new_sta_password);
     // disconnect from current wifi network
     WiFi.disconnect(true);
     // reconnect to wifi network with new sta ssid and password
@@ -125,7 +123,7 @@ void handleSTACredentialsSet()
 
     unsigned long startAttemptTime = millis();
 
-    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 5000) // 5 seconds timeout
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 2000) // 2 seconds timeout
     {
       delay(500);
       Serial.println("Connecting to WiFi...");
@@ -135,10 +133,15 @@ void handleSTACredentialsSet()
     {
       Serial.print("Connected to WiFi, IP address: ");
       Serial.println(WiFi.localIP());
-        }
+
+      String localIP = WiFi.localIP().toString();
+      // Include the local IP in the response
+      server.send(200, "text/plain", new_sta_ssid + " " + new_sta_password + " " + localIP);
+    }
     else
     {
       Serial.println("Failed to connect to WiFi");
+      server.send(200, "text/plain", new_sta_ssid + " " + new_sta_password + " " + "Failed to connect");
     }
   }
   else
@@ -182,7 +185,7 @@ void setup()
 
   unsigned long startAttemptTime = millis();
 
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 5000) // 2 seconds timeout
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 2000) // 2 seconds timeout
   {
     delay(500);
     Serial.println("Connecting to WiFi...");

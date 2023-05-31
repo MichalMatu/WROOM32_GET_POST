@@ -149,11 +149,22 @@
             xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhttp.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
-                    alert("STA Credentials Updated: " + this.responseText);
+                    // parse the response (assuming it's formatted as 'SSID PASSWORD')
+                    var credentials = this.responseText.split(' ');
+
+                    // set the SSID and password
+                    document.getElementById("STASSID").innerText = 'SSID: ' + credentials[0];
+                    document.getElementById("STAPassword").innerText = 'Password: ' + credentials[1];
+
+                    // if there's a third item in the response, set it as the IP
+                    if (credentials.length > 2) {
+                        document.getElementById("STAIP").innerText = 'IP: ' + credentials[2];
+                    }
                 }
             };
             xhttp.send("sta_ssid=" + sta_ssid + "&sta_password=" + sta_password);
         }
+
 
 
 
