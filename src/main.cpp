@@ -4,14 +4,14 @@
 #include <Preferences.h>
 
 Preferences preferences;
+AsyncWebServer server(80);
+
 // WiFi AP credentials
 char ap_ssid[32] = "ESP32-AP";
 char ap_password[64] = "password";
 // WiFi Station credentials
 char sta_ssid[32] = "esp32";
 char sta_password[64] = "0123456789";
-
-AsyncWebServer server(80);
 
 void setupWiFi()
 {
@@ -23,7 +23,7 @@ void setupWiFi()
 
   WiFi.begin(sta_ssid, sta_password);
   unsigned long startAttemptTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 8000)
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 4000)
   {
     delay(500);
     Serial.println("Connecting to WiFi...");
