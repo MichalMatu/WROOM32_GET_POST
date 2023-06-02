@@ -16,6 +16,16 @@ char sta_password[64] = "0123456789";
 const int analogPin = 36;
 int sensorValue = 0;
 // #########################################################################################################################
+void setupSPIFFS()
+{
+  if (!SPIFFS.begin(true))
+  {
+    Serial.println("An error occurred while mounting SPIFFS");
+    // Handle the error here, such as returning from the function or taking appropriate action
+    return;
+  }
+}
+// #########################################################################################################################
 void setupWiFi()
 {
   WiFi.mode(WIFI_AP_STA);
@@ -40,16 +50,6 @@ void setupWiFi()
   else
   {
     Serial.println("Failed to connect to WiFi");
-  }
-}
-// #########################################################################################################################
-void setupSPIFFS()
-{
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println("An error occurred while mounting SPIFFS");
-    // Handle the error here, such as returning from the function or taking appropriate action
-    return;
   }
 }
 // #########################################################################################################################
