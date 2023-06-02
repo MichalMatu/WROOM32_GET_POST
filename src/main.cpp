@@ -1,18 +1,21 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
-#include <Preferences.h>
+#include <WebSocketsServer.h>
 
-Preferences preferences;
+// #########################################################################################################################
 AsyncWebServer server(80);
-
-// WiFi AP credentials
+WebSocketsServer webSocket(81);
+// #########################################################################################################################
+// WiFi AP/Station credentials
 char ap_ssid[32] = "ESP32-AP";
 char ap_password[64] = "password";
-// WiFi Station credentials
 char sta_ssid[32] = "esp32";
 char sta_password[64] = "0123456789";
-
+// #########################################################################################################################
+const int analogPin = 36;
+int sensorValue = 0;
+// #########################################################################################################################
 void setupWiFi()
 {
   WiFi.mode(WIFI_AP_STA);
@@ -39,7 +42,7 @@ void setupWiFi()
     Serial.println("Failed to connect to WiFi");
   }
 }
-
+// #########################################################################################################################
 void setupSPIFFS()
 {
   if (!SPIFFS.begin(true))
@@ -49,21 +52,33 @@ void setupSPIFFS()
     return;
   }
 }
-
+// #########################################################################################################################
+void handleWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
+{
+  // Handle WebSocket events here, if needed
+}
+// #########################################################################################################################
 void setup()
 {
   Serial.begin(115200);
-  preferences.begin("myApp", false);
-
+  // --------------------------------------------------------------------------
   setupSPIFFS();
   setupWiFi();
-
+  // --------------------------------------------------------------------------
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-
   server.begin();
+  // --------------------------------------------------------------------------
+  webSocket.begin();
+  webSocket.onEvent(handleWebSocketEvent);
 }
-
+// #########################################################################################################################
 void loop()
 {
-  // Your code for other tasks, if any
+  sensorValue = analogRead(analogPin); // Update the sensor value dynamically (replace with actual sensor reading)
+
+  String sensorData = String(sensorValue); // Create a named String object
+
+  webSocket.broadcastTXT(sensorData); // Broadcast the sensor data to all connected clients
+
+  delay(1000);
 }
