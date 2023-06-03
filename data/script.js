@@ -1,6 +1,7 @@
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener("load", onLoad);
+// connect to WebSocket in server
 function initWebSocket() {
   console.log("Trying to open a WebSocket connection...");
   websocket = new WebSocket(gateway);
@@ -8,6 +9,7 @@ function initWebSocket() {
   websocket.onclose = onClose;
   websocket.onmessage = onMessage; // <-- add this line
 }
+// WebSocket event handlers
 function onOpen(event) {
   console.log("Connection opened");
 }
@@ -27,6 +29,7 @@ function onMessage(event) {
   }
   document.getElementById("state").innerHTML = state;
 }
+// initialize
 function onLoad(event) {
   initWebSocket();
   initButton();
