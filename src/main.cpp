@@ -5,7 +5,7 @@
 #include <SPIFFS.h>
 
 // ########################################################################################
-// Create AsyncWebServer object on port 80
+// Create AsyncWebServer object on port 80 and websocket object
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 // ########################################################################################
