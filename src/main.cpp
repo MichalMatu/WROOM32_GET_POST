@@ -58,11 +58,13 @@ void setupWiFi()
   }
 }
 // ########################################################################################
+// Send message to all connected clients
 void notifyClients()
 {
   ws.textAll(String(ledState));
 }
 // ########################################################################################
+// Receive message from client and send it back
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
   AwsFrameInfo *info = (AwsFrameInfo *)arg;
