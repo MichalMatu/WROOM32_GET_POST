@@ -1,20 +1,25 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <AsyncTCP.h>
+#include <WiFiClientSecure.h>
 #include <SPIFFS.h>
-#include <WebSocketsServer.h>
 
 // #########################################################################################################################
+// Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
-WebSocketsServer webSocket(81);
+AsyncWebSocket ws("/ws");
 // #########################################################################################################################
 // WiFi AP/Station credentials
 char ap_ssid[32] = "ESP32-AP";
 char ap_password[64] = "password";
-char sta_ssid[32] = "esp32";
-char sta_password[64] = "0123456789";
+char sta_ssid[32] = "2.4G-vnet-5071C8";
+char sta_password[64] = "vnet249216582";
 // #########################################################################################################################
 const int analogPin = 36;
 int sensorValue = 0;
+
+bool ledState = 0;
+const int ledPin = 2;
 // #########################################################################################################################
 void setupSPIFFS()
 {
@@ -36,7 +41,7 @@ void setupWiFi()
 
   WiFi.begin(sta_ssid, sta_password);
   unsigned long startAttemptTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 4000)
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 8000)
   {
     delay(500);
     Serial.println("Connecting to WiFi...");
@@ -53,32 +58,88 @@ void setupWiFi()
   }
 }
 // #########################################################################################################################
-void handleWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
+void notifyClients()
 {
-  // Handle WebSocket events here, if needed
+  ws.textAll(String(ledState));
+}
+// #########################################################################################################################
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
+{
+  AwsFrameInfo *info = (AwsFrameInfo *)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+  {
+    data[len] = 0;
+    if (strcmp((char *)data, "toggle") == 0)
+    {
+      ledState = !ledState;
+      notifyClients();
+    }
+  }
+}
+// #########################################################################################################################
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len)
+{
+  switch (type)
+  {
+  case WS_EVT_CONNECT:
+    Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+    break;
+  case WS_EVT_DISCONNECT:
+    Serial.printf("WebSocket client #%u disconnected\n", client->id());
+    break;
+  case WS_EVT_DATA:
+    handleWebSocketMessage(arg, data, len);
+    break;
+  case WS_EVT_PONG:
+  case WS_EVT_ERROR:
+    break;
+  }
+}
+// #########################################################################################################################
+void initWebSocket()
+{
+  ws.onEvent(onEvent);
+  server.addHandler(&ws);
+}
+// #########################################################################################################################
+String processor(const String &var)
+{
+  Serial.println(var);
+  if (var == "STATE")
+  {
+    if (ledState)
+    {
+      return "ON";
+    }
+    else
+    {
+      return "OFF";
+    }
+  }
+  return String();
 }
 // #########################################################################################################################
 void setup()
 {
   Serial.begin(115200);
+
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
   // --------------------------------------------------------------------------
   setupSPIFFS();
   setupWiFi();
+
   // --------------------------------------------------------------------------
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+  initWebSocket();
   server.begin();
+
   // --------------------------------------------------------------------------
-  webSocket.begin();
-  webSocket.onEvent(handleWebSocketEvent);
 }
 // #########################################################################################################################
 void loop()
 {
-  sensorValue = analogRead(analogPin); // Update the sensor value dynamically (replace with actual sensor reading)
-
-  String sensorData = String(sensorValue); // Create a named String object
-
-  webSocket.broadcastTXT(sensorData); // Broadcast the sensor data to all connected clients
-
-  delay(1000);
+  ws.cleanupClients();
+  digitalWrite(ledPin, ledState);
 }
